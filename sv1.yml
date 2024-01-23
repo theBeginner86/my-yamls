@@ -4,7 +4,7 @@ metadata:
   name: my-service-0
 spec:
   selector:
-    app.kubernetes.io/name: MyApp
+    app.kubernetes.io/name: MyApp-1
   ports:
     - protocol: TCP
       port: 80
