@@ -1,18 +1,31 @@
-name: MeshMap Screenshot Service
+name: Kanvas Screenshot Service
 on: # rebuild any PRs and main branch changes
   pull_request_target:
     types: [opened, synchronize, reopened]
-  
-  workflow_call:
+  workflow_dispatch:
     inputs:
-      fileName: 
-        description: Relative file path from the root directory
+      contentID: 
+        description: ID of the design to render.
         required: true
         type: string
+      assetLocation:
+        required: true
+        type: string
+        description: Remote location where the generated asset (screenshot) for the design will be stored.
+  workflow_call:
+    inputs:
+      contentID: 
+        description: ID of the design to render.
+        required: true
+        type: string
+      assetLocation:
+        required: true
+        type: string
+        description: Remote location where the generated asset (screenshot) for the design will be stored.
     outputs:
       resource_url:
         description: "The URL of the generated resource."
-        value: ${{ jobs.MeshMapScreenshot.outputs.resource_url }}
+        value: ${{ jobs.KanvasScreenshot.outputs.resource_url }}
 permissions: 
   actions: read
   contents: write
@@ -22,7 +35,7 @@ permissions:
   id-token: write
 
 jobs:
-  MeshMapScreenshot:
+  KanvasScreenshot:
     runs-on: ubuntu-latest
     outputs:
       resource_url: ${{ steps.test_result.outputs.resource_url }}
@@ -35,12 +48,18 @@ jobs:
       - uses: actions/checkout@v3 #this step would go away
         with:
           path: action
-          repository: thebeginner86/MeshMap-Snapshot
+          repository: layer5labs/kanvas-snapshot
+      - run: |
+         echo ${{ inputs.contentID }}
+         echo ${{ inputs.assetLocation }}
+        shell: bash
       - id: test_result
-        uses: thebeginner86/MeshMap-Snapshot@master
+        uses: layer5labs/Kanvas-Snapshot@v0.2.13
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }} # github's personal access token example: "ghp_...."
-          providerToken: ${{ secrets.MESHERY_PROVIDER_TOKEN }} # Meshery Cloud Authentication token, signin to meshery-cloud to get one, example: ey.....
+          mesheryToken: ${{ secrets.MESHERY_TOKEN }} # Meshery Cloud Authentication token, signin to meshery-cloud to get one, example: ey.....
           prNumber: ${{ env.PULL_NO }} # auto-filled from the above step
-          application_type: 'Kubernetes Manifest' # your application type, could be any of three: "Kubernetes Manifest", "Docker Compose", "Helm Chart"
-          filePath: ${{ inputs.fileName == '' && 'sv1.yml' || inputs.fileName }} # relative file-path from the root directory in the github-runner env, you might require to checkout the repository as described in step 2
+          application_type: "Design" # your application type, could be any of three: "Kubernetes Manifest", "Docker Compose", "Helm Chart"
+          skipComment: true
+          designID: ${{ inputs.contentID }} # relative file-path from the root directory in the github-runner env, you might require to checkout the repository as described in step 2
+          assetLocation: ${{ inputs.assetLocation }}
