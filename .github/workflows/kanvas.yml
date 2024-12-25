@@ -50,8 +50,10 @@ jobs:
       - id: test_result
         uses: layer5labs/kanvas-snapshot@v0.2.20
         with:
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          mesheryToken: ${{ secrets.MESHERY_TOKEN }}
-          prNumber: ${{ env.PULL_NO }}
-          application_type: Kubernetes Manifest
-          filePath: ${{ inputs.fileName == '' && 'sv1.yml' || inputs.fileName }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }} # github's personal access token example: "ghp_...."
+          mesheryToken: ${{ secrets.MESHERY_TOKEN }} # Meshery Cloud Authentication token, signin to meshery-cloud to get one, example: ey.....
+          prNumber: ${{ env.PULL_NO }} # auto-filled from the above step
+          application_type: "Design" # your application type, could be any of three: "Kubernetes Manifest", "Docker Compose", "Helm Chart"
+          skipComment: true
+          designID: ${{ inputs.contentID }} # relative file-path from the root directory in the github-runner env, you might require to checkout the repository as described in step 2
+          assetLocation: ${{ inputs.assetLocation }}
